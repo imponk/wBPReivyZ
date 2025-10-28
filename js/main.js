@@ -18,7 +18,8 @@ let isDragging = false, dragStartX = 0, dragStartY = 0, dragOffsetX = 0, dragOff
 
 const ORIENTATIONS = {
   vertical:  { width: 1080, height: 1350 },
-  horizontal:{ width: 1080, height: 608 }
+  horizontal:{ width: 1080, height: 608 },
+  square:    { width: 1080, height: 1080 }
 };
 
 function setOrientation(mode){
@@ -66,7 +67,6 @@ function drawFoto(){
   ctxFoto.fillStyle = "#fafafa";
   ctxFoto.fillRect(0,0,canvasFoto.width,canvasFoto.height);
 
-  // Foto utama
   const baseScale = Math.max(canvasFoto.width / img.width, canvasFoto.height / img.height);
   const scale = baseScale * zoomFactor;
   const drawW = img.width * scale;
@@ -76,16 +76,21 @@ function drawFoto(){
   ctxFoto.drawImage(img, posX, posY, drawW, drawH);
 
   const margin = rel(0.046);
-  const isVertical = (orientationSelect.value === "vertical");
-  const scaleFactor = isVertical ? 0.9 : 1.0;
+  const orientation = orientationSelect.value;
+  let scaleFactor = 1.0;
+
+  if (orientation === "vertical" || orientation === "square") scaleFactor = 0.9;
+  else if (orientation === "horizontal") scaleFactor = 0.8;
 
   // === LOGO KANAN ATAS ===
   if (logoKananAtas.complete){
     let w = Math.round(canvasFoto.width * 0.185 * scaleFactor);
     let h = logoKananAtas.height * (w / logoKananAtas.width);
+    let x = canvasFoto.width - w;
+    let y = 0;
     ctxFoto.save();
     if (invertJawapos.checked) ctxFoto.filter = "invert(1)";
-    ctxFoto.drawImage(logoKananAtas, canvasFoto.width - w - margin, margin, w, h);
+    ctxFoto.drawImage(logoKananAtas, x, y, w, h);
     ctxFoto.restore();
   }
 
@@ -93,8 +98,8 @@ function drawFoto(){
   if (logoKiriBawah.complete){
     let w = Math.round(canvasFoto.width * 0.093 * scaleFactor);
     let h = logoKiriBawah.height * (w / logoKiriBawah.width);
-    let x = isVertical ? 0 : margin * 0.3;
-    let y = isVertical ? canvasFoto.height - h : canvasFoto.height - h;
+    let x = 0;
+    let y = canvasFoto.height - h;
     ctxFoto.drawImage(logoKiriBawah, x, y, w, h);
   }
 
