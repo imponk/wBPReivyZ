@@ -135,18 +135,22 @@ function drawFoto(){
   const type = awardSelect.value;
   if (type && awardLogos[type] && awardLogos[type].complete){
     const logo = awardLogos[type];
+    const marginRight = 46;
 
-    // Skala & posisi award
     let awardScale = 1.0;
-    let marginBottom = Math.round(canvasFoto.height * 0.046);
-    if (orientation === "horizontal") {
-      awardScale = 1.6;     // horizontal lebih besar 160%
-      marginBottom = 80;    // horizontal jarak bawah 80px
+    let marginBottom = 100;
+
+    if (orientation === "vertical") {
+      marginBottom = 110;
+    } else if (orientation === "square") {
+      marginBottom = 100;
+    } else if (orientation === "horizontal") {
+      awardScale = 1.6;
+      marginBottom = 80;
     }
 
     const w = rel(0.11) * awardScale;
     const h = logo.height * (w / logo.width);
-    const marginRight = 46; // jarak kanan untuk semua versi
     const ax = canvasFoto.width - marginRight - w / 2;
     const ay = canvasFoto.height - marginBottom;
 
