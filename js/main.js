@@ -80,7 +80,7 @@ function drawFoto(){
   if (orientation === "vertical" || orientation === "square") scaleFactor = 0.9;
   else if (orientation === "horizontal") scaleFactor = 0.8;
 
-  // === LOGO TEKS (pojok kanan atas, jarak 50 kanan, 45 atas) ===
+  // === LOGO TEKS (pojok kanan atas, 50 kanan, 45 atas) ===
   if (logoKananAtas.complete){
     const w = Math.round(canvasFoto.width * 0.185 * scaleFactor);
     const h = logoKananAtas.height * (w / logoKananAtas.width);
@@ -135,27 +135,39 @@ function drawFoto(){
   const type = awardSelect.value;
   if (type && awardLogos[type] && awardLogos[type].complete){
     const logo = awardLogos[type];
-    const marginRight = 46;
 
+    // parameter paten
+    const marginRight = 46;
+    let marginBottom = 200;      // default square
     let awardScale = 1.0;
-    let marginBottom = 100;
-    if (orientation === "vertical") marginBottom = 110;
-    else if (orientation === "square") marginBottom = 100;
-    else if (orientation === "horizontal") {
-      awardScale = 1.6;
-      marginBottom = 80;
+
+    if (orientation === "vertical") {
+      marginBottom = 220;
+      awardScale = 1.0;
+    } else if (orientation === "square") {
+      marginBottom = 200;
+      awardScale = 1.0;
+    } else if (orientation === "horizontal") {
+      marginBottom = 160;
+      awardScale = 1.6; // 160%
     }
 
     const w = rel(0.11) * awardScale;
     const h = logo.height * (w / logo.width);
 
-    // Gunakan pojok kanan-bawah sebagai acuan posisi
-    const ax = canvasFoto.width - marginRight - w;
-    const ay = canvasFoto.height - marginBottom - h;
+    const theta = Math.PI / 10; // 18°
+    // koreksi jarak bawah akibat rotasi:
+    // titik paling bawah setelah rotasi (pivot di kanan-bawah) turun sebesar w * sin(theta).
+    const drop = w * Math.sin(theta);
+
+    // tempatkan pivot (kanan-bawah sebelum rotasi) sehingga jarak ke bawah = marginBottom
+    const tx = canvasFoto.width - marginRight;                 // pivot x persis 46px dari kanan
+    const ty = canvasFoto.height - marginBottom - drop;        // koreksi agar jarak bawah akurat
 
     ctxFoto.save();
-    ctxFoto.translate(ax + w, ay + h); // rotasi dari pojok kanan bawah
-    ctxFoto.rotate(-Math.PI / 10);
+    ctxFoto.translate(tx, ty);
+    ctxFoto.rotate(-theta);
+    // gambar dengan top-left pada (-w, -h) => pivot = kanan-bawah sebelum rotasi
     ctxFoto.drawImage(logo, -w, -h, w, h);
     ctxFoto.restore();
   }
