@@ -23,9 +23,9 @@ body {
 }
 .canvas-wrapper {
   position: relative;
-  width: 1080px;
-  height: 1350px;
   margin: 0 auto;
+  width: fit-content;   /* <- mengikuti ukuran kanvas */
+  height: fit-content;  /* <- mengikuti ukuran kanvas */
 }
 canvas {
   display: block;
