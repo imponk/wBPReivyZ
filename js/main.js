@@ -75,19 +75,18 @@ function drawFoto(){
   const posY = (canvasFoto.height - drawH) / 2 + offsetY;
   ctxFoto.drawImage(img, posX, posY, drawW, drawH);
 
-  const margin = rel(0.046);
+  // Tentukan orientasi & skala logo
   const orientation = orientationSelect.value;
   let scaleFactor = 1.0;
-
   if (orientation === "vertical" || orientation === "square") scaleFactor = 0.9;
   else if (orientation === "horizontal") scaleFactor = 0.8;
 
   // === LOGO KANAN ATAS ===
   if (logoKananAtas.complete){
-    let w = Math.round(canvasFoto.width * 0.185 * scaleFactor);
-    let h = logoKananAtas.height * (w / logoKananAtas.width);
-    let x = canvasFoto.width - w;
-    let y = 0;
+    const w = Math.round(canvasFoto.width * 0.185 * scaleFactor);
+    const h = logoKananAtas.height * (w / logoKananAtas.width);
+    const x = canvasFoto.width - w; // pojok kanan
+    const y = 0; // pojok atas
     ctxFoto.save();
     if (invertJawapos.checked) ctxFoto.filter = "invert(1)";
     ctxFoto.drawImage(logoKananAtas, x, y, w, h);
@@ -96,10 +95,10 @@ function drawFoto(){
 
   // === LOGO KIRI BAWAH ===
   if (logoKiriBawah.complete){
-    let w = Math.round(canvasFoto.width * 0.093 * scaleFactor);
-    let h = logoKiriBawah.height * (w / logoKiriBawah.width);
-    let x = 0;
-    let y = canvasFoto.height - h;
+    const w = Math.round(canvasFoto.width * 0.093 * scaleFactor);
+    const h = logoKiriBawah.height * (w / logoKiriBawah.width);
+    const x = 0; // pojok kiri
+    const y = canvasFoto.height - h; // pojok bawah
     ctxFoto.drawImage(logoKiriBawah, x, y, w, h);
   }
 
@@ -109,7 +108,7 @@ function drawFoto(){
     const sc = maxW / medsosLogo.width;
     const w = medsosLogo.width * sc;
     const h = medsosLogo.height * sc;
-    const bottomGap = rel(0.12);
+    const bottomGap = Math.round(canvasFoto.height * 0.12);
     ctxFoto.save();
     if (invertMedsos.checked) ctxFoto.filter = "invert(1)";
     ctxFoto.drawImage(medsosLogo, (canvasFoto.width - w)/2, canvasFoto.height - h - bottomGap, w, h);
@@ -118,8 +117,8 @@ function drawFoto(){
 
   // === KREDIT FOTO ===
   if (kreditInput.value){
-    ctxFoto.font = `${Math.max(14, rel(0.016))}px Metropolis`;
-    ctxFoto.font = 'bold ' + ctxFoto.font;
+    const margin = Math.round(canvasFoto.height * 0.046);
+    ctxFoto.font = `bold ${Math.max(14, Math.round(canvasFoto.height * 0.016))}px Metropolis`;
     ctxFoto.fillStyle = kreditColor.value;
     const tw = ctxFoto.measureText(kreditInput.value).width;
     ctxFoto.fillText(kreditInput.value, canvasFoto.width - tw - margin, canvasFoto.height - margin);
@@ -131,6 +130,7 @@ function drawFoto(){
     const logo = awardLogos[type];
     const w = rel(0.11);
     const h = logo.height * (w / logo.width);
+    const margin = Math.round(canvasFoto.height * 0.046);
     const ax = canvasFoto.width - margin * 2.2;
     const ay = canvasFoto.height - margin * 3.6;
     ctxFoto.save();
