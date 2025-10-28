@@ -16,23 +16,24 @@ const orientationSelect = document.getElementById("orientation");
 let img = null, zoomFactor = 1, offsetX = 0, offsetY = 0;
 let isDragging = false, dragStartX = 0, dragStartY = 0, dragOffsetX = 0, dragOffsetY = 0;
 
-// Orientasi & ukuran kanvas
 const ORIENTATIONS = {
-  vertical:  { width: 1080, height: 1350 },   // 4:5 – rekomendasi IG
-  horizontal:{ width: 1080, height: 608 }     // 16:9 – rekomendasi IG (dibulatkan)
+  vertical:  { width: 1080, height: 1350 },
+  horizontal:{ width: 1080, height: 608 }
 };
+
 function setOrientation(mode){
   const o = ORIENTATIONS[mode] || ORIENTATIONS.vertical;
-  canvasFoto.width = o.width;  canvasFoto.height = o.height;
-  canvasUI.width   = o.width;  canvasUI.height   = o.height;
-  // reset view tapi simpan zoom agar feel-nya konsisten
+  canvasFoto.width = o.width;
+  canvasFoto.height = o.height;
+  canvasUI.width = o.width;
+  canvasUI.height = o.height;
   offsetX = 0;
   offsetY = 0;
   drawFoto(); drawUI();
 }
 setOrientation(orientationSelect?.value || "vertical");
 
-// Logo
+// LOGO assets
 const logoKiriBawah = new Image();
 logoKiriBawah.crossOrigin = "anonymous";
 logoKiriBawah.src = "assets/logo-jawapos-kotak.svg";
@@ -45,7 +46,7 @@ const medsosLogo = new Image();
 medsosLogo.crossOrigin = "anonymous";
 medsosLogo.src = "assets/logo-medsos.svg";
 
-// Award logos
+// AWARDS
 const awardLogos = {
   gold: new Image(),
   silver: new Image(),
@@ -55,9 +56,7 @@ awardLogos.gold.src = "assets/award-gold.png";
 awardLogos.silver.src = "assets/award-silver.png";
 awardLogos.bronze.src = "assets/award-bronze.png";
 
-function rel(n){ // helper untuk ukuran relatif berdasarkan sisi terkecil kanvas
-  return Math.round(Math.min(canvasFoto.width, canvasFoto.height) * n);
-}
+function rel(n){ return Math.round(Math.min(canvasFoto.width, canvasFoto.height) * n); }
 
 function drawFoto(){
   if (!img) {
@@ -67,7 +66,7 @@ function drawFoto(){
   ctxFoto.fillStyle = "#fafafa";
   ctxFoto.fillRect(0,0,canvasFoto.width,canvasFoto.height);
 
-  // Foto (cover + zoom + drag)
+  // Foto utama
   const baseScale = Math.max(canvasFoto.width / img.width, canvasFoto.height / img.height);
   const scale = baseScale * zoomFactor;
   const drawW = img.width * scale;
@@ -76,38 +75,43 @@ function drawFoto(){
   const posY = (canvasFoto.height - drawH) / 2 + offsetY;
   ctxFoto.drawImage(img, posX, posY, drawW, drawH);
 
-  const margin = rel(0.046); // ~50px pada 1080 tinggi
-  // Logo kanan atas (lebar relatif)
+  const margin = rel(0.046);
+  const isVertical = (orientationSelect.value === "vertical");
+  const scaleFactor = isVertical ? 0.9 : 1.0;
+
+  // === LOGO KANAN ATAS ===
   if (logoKananAtas.complete){
-    const w = Math.round(canvasFoto.width * 0.185);
-    const h = logoKananAtas.height * (w / logoKananAtas.width);
+    let w = Math.round(canvasFoto.width * 0.185 * scaleFactor);
+    let h = logoKananAtas.height * (w / logoKananAtas.width);
     ctxFoto.save();
     if (invertJawapos.checked) ctxFoto.filter = "invert(1)";
     ctxFoto.drawImage(logoKananAtas, canvasFoto.width - w - margin, margin, w, h);
     ctxFoto.restore();
   }
 
-  // Logo kiri bawah
+  // === LOGO KIRI BAWAH ===
   if (logoKiriBawah.complete){
-    const w = Math.round(canvasFoto.width * 0.093);
-    const h = logoKiriBawah.height * (w / logoKiriBawah.width);
-    ctxFoto.drawImage(logoKiriBawah, margin * 0.3, canvasFoto.height - h, w, h);
+    let w = Math.round(canvasFoto.width * 0.093 * scaleFactor);
+    let h = logoKiriBawah.height * (w / logoKiriBawah.width);
+    let x = isVertical ? 0 : margin * 0.3;
+    let y = isVertical ? canvasFoto.height - h : canvasFoto.height - h;
+    ctxFoto.drawImage(logoKiriBawah, x, y, w, h);
   }
 
-  // Logo medsos (lebar maksimal 71% lebar kanvas, dengan jarak bawah relatif)
+  // === LOGO MEDSOS ===
   if (medsosLogo.complete){
     const maxW = canvasFoto.width * 0.71;
     const sc = maxW / medsosLogo.width;
     const w = medsosLogo.width * sc;
     const h = medsosLogo.height * sc;
-    const bottomGap = rel(0.12); // jarak dari bawah
+    const bottomGap = rel(0.12);
     ctxFoto.save();
     if (invertMedsos.checked) ctxFoto.filter = "invert(1)";
     ctxFoto.drawImage(medsosLogo, (canvasFoto.width - w)/2, canvasFoto.height - h - bottomGap, w, h);
     ctxFoto.restore();
   }
 
-  // Kredit foto
+  // === KREDIT FOTO ===
   if (kreditInput.value){
     ctxFoto.font = `${Math.max(14, rel(0.016))}px Metropolis`;
     ctxFoto.font = 'bold ' + ctxFoto.font;
@@ -116,7 +120,7 @@ function drawFoto(){
     ctxFoto.fillText(kreditInput.value, canvasFoto.width - tw - margin, canvasFoto.height - margin);
   }
 
-  // Award
+  // === AWARD LOGO ===
   const type = awardSelect.value;
   if (type && awardLogos[type] && awardLogos[type].complete){
     const logo = awardLogos[type];
@@ -173,13 +177,9 @@ invertJawapos.addEventListener("change", drawFoto);
 invertMedsos.addEventListener("change", drawFoto);
 awardSelect.addEventListener("change", drawFoto);
 zoomSlider.addEventListener("input", ()=>{ zoomFactor=parseFloat(zoomSlider.value); drawFoto(); });
+orientationSelect.addEventListener("change", (e)=>{ setOrientation(e.target.value); });
 
-// Ganti orientasi
-orientationSelect.addEventListener("change", (e)=>{
-  setOrientation(e.target.value);
-});
-
-// Drag
+// Drag & zoom gesture
 canvasFoto.addEventListener("mousedown", e=>{
   isDragging=true;dragStartX=e.clientX;dragStartY=e.clientY;
   dragOffsetX=offsetX;dragOffsetY=offsetY;
@@ -199,7 +199,7 @@ window.addEventListener("mouseup", ()=>{
   isDragging=false;canvasFoto.classList.remove("grabbing");
 });
 
-// Pinch zoom
+// Pinch zoom (mobile)
 let lastDist=0;
 canvasFoto.addEventListener("touchstart",e=>{
   if(e.touches.length===2){
@@ -224,10 +224,10 @@ canvasFoto.addEventListener("touchmove",e=>{
   }
 });
 
-// Download hanya foto
+// Download hasil
 downloadBtn.addEventListener("click", ()=>{
   if (!img) return alert("Belum ada gambar.");
-  drawFoto(); // pastikan sudah tergambar
+  drawFoto();
   canvasFoto.toBlob(blob=>{
     const url=URL.createObjectURL(blob);
     const a=document.createElement("a");
@@ -241,15 +241,11 @@ downloadBtn.addEventListener("click", ()=>{
 });
 
 drawUI();
-// Muat semua gambar aset saat script dijalankan
 Promise.all([
-    new Promise(resolve => logoKiriBawah.onload = resolve),
-    new Promise(resolve => logoKananAtas.onload = resolve),
-    new Promise(resolve => medsosLogo.onload = resolve),
-    new Promise(resolve => awardLogos.gold.onload = resolve),
-    new Promise(resolve => awardLogos.silver.onload = resolve),
-    new Promise(resolve => awardLogos.bronze.onload = resolve)
-]).then(() => {
-    console.log("Semua aset gambar berhasil dimuat.");
-    drawFoto();
-});
+  new Promise(res => logoKiriBawah.onload = res),
+  new Promise(res => logoKananAtas.onload = res),
+  new Promise(res => medsosLogo.onload = res),
+  new Promise(res => awardLogos.gold.onload = res),
+  new Promise(res => awardLogos.silver.onload = res),
+  new Promise(res => awardLogos.bronze.onload = res)
+]).then(() => { drawFoto(); });
