@@ -136,17 +136,19 @@ function drawFoto(){
   if (type && awardLogos[type] && awardLogos[type].complete){
     const logo = awardLogos[type];
 
-    // Skala award per orientasi
+    // Skala & posisi award
     let awardScale = 1.0;
-    if (orientation === "horizontal") awardScale = 1.6; // horizontal lebih besar 160%
+    let marginBottom = Math.round(canvasFoto.height * 0.046);
+    if (orientation === "horizontal") {
+      awardScale = 1.6;     // horizontal lebih besar 160%
+      marginBottom = 80;    // horizontal jarak bawah 80px
+    }
 
     const w = rel(0.11) * awardScale;
     const h = logo.height * (w / logo.width);
-    const marginRight = 46; // jarak dari kanan untuk semua versi
-    const marginBottom = Math.round(canvasFoto.height * 0.046);
-
+    const marginRight = 46; // jarak kanan untuk semua versi
     const ax = canvasFoto.width - marginRight - w / 2;
-    const ay = canvasFoto.height - marginBottom * 3.6;
+    const ay = canvasFoto.height - marginBottom;
 
     ctxFoto.save();
     ctxFoto.translate(ax, ay);
