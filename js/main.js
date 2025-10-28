@@ -81,12 +81,12 @@ function drawFoto(){
   if (orientation === "vertical" || orientation === "square") scaleFactor = 0.9;
   else if (orientation === "horizontal") scaleFactor = 0.8;
 
-  // === LOGO TEKS (posisi kiri atas, 50px dari kiri, 45px dari atas) ===
+  // === LOGO TEKS (pojok kanan atas, jarak 50px kanan & 45px atas) ===
   if (logoKananAtas.complete){
     const w = Math.round(canvasFoto.width * 0.185 * scaleFactor);
     const h = logoKananAtas.height * (w / logoKananAtas.width);
-    const x = 50; // jarak dari kiri
-    const y = 45; // jarak dari atas
+    const x = canvasFoto.width - w - 50; // 50 px dari kanan
+    const y = 45; // 45 px dari atas
     ctxFoto.save();
     if (invertJawapos.checked) ctxFoto.filter = "invert(1)";
     ctxFoto.drawImage(logoKananAtas, x, y, w, h);
@@ -97,8 +97,8 @@ function drawFoto(){
   if (logoKiriBawah.complete){
     const w = Math.round(canvasFoto.width * 0.093 * scaleFactor);
     const h = logoKiriBawah.height * (w / logoKiriBawah.width);
-    const x = 0; // pojok kiri
-    const y = canvasFoto.height - h; // pojok bawah
+    const x = 0;
+    const y = canvasFoto.height - h;
     ctxFoto.drawImage(logoKiriBawah, x, y, w, h);
   }
 
