@@ -11,9 +11,26 @@ const invertJawapos = document.getElementById("invertJawapos");
 const invertMedsos = document.getElementById("invertMedsos");
 const zoomSlider = document.getElementById("zoomSlider");
 const awardSelect = document.getElementById("awardSelect");
+const orientationSelect = document.getElementById("orientation");
 
 let img = null, zoomFactor = 1, offsetX = 0, offsetY = 0;
 let isDragging = false, dragStartX = 0, dragStartY = 0, dragOffsetX = 0, dragOffsetY = 0;
+
+// Orientasi & ukuran kanvas
+const ORIENTATIONS = {
+  vertical:  { width: 1080, height: 1350 },   // 4:5 – rekomendasi IG
+  horizontal:{ width: 1080, height: 608 }     // 16:9 – rekomendasi IG (dibulatkan)
+};
+function setOrientation(mode){
+  const o = ORIENTATIONS[mode] || ORIENTATIONS.vertical;
+  canvasFoto.width = o.width;  canvasFoto.height = o.height;
+  canvasUI.width   = o.width;  canvasUI.height   = o.height;
+  // reset view tapi simpan zoom agar feel-nya konsisten
+  offsetX = 0;
+  offsetY = 0;
+  drawFoto(); drawUI();
+}
+setOrientation(orientationSelect?.value || "vertical");
 
 // Logo
 const logoKiriBawah = new Image();
@@ -38,6 +55,10 @@ awardLogos.gold.src = "assets/award-gold.png";
 awardLogos.silver.src = "assets/award-silver.png";
 awardLogos.bronze.src = "assets/award-bronze.png";
 
+function rel(n){ // helper untuk ukuran relatif berdasarkan sisi terkecil kanvas
+  return Math.round(Math.min(canvasFoto.width, canvasFoto.height) * n);
+}
+
 function drawFoto(){
   if (!img) {
     ctxFoto.clearRect(0,0,canvasFoto.width,canvasFoto.height);
@@ -46,7 +67,7 @@ function drawFoto(){
   ctxFoto.fillStyle = "#fafafa";
   ctxFoto.fillRect(0,0,canvasFoto.width,canvasFoto.height);
 
-  // Foto
+  // Foto (cover + zoom + drag)
   const baseScale = Math.max(canvasFoto.width / img.width, canvasFoto.height / img.height);
   const scale = baseScale * zoomFactor;
   const drawW = img.width * scale;
@@ -55,44 +76,58 @@ function drawFoto(){
   const posY = (canvasFoto.height - drawH) / 2 + offsetY;
   ctxFoto.drawImage(img, posX, posY, drawW, drawH);
 
-  // Logo kanan atas
+  const margin = rel(0.046); // ~50px pada 1080 tinggi
+  // Logo kanan atas (lebar relatif)
   if (logoKananAtas.complete){
-    const w=200,h=logoKananAtas.height*(200/logoKananAtas.width);
-    ctxFoto.save();if(invertJawapos.checked)ctxFoto.filter="invert(1)";
-    ctxFoto.drawImage(logoKananAtas,canvasFoto.width-w-50,50,w,h);ctxFoto.restore();
+    const w = Math.round(canvasFoto.width * 0.185);
+    const h = logoKananAtas.height * (w / logoKananAtas.width);
+    ctxFoto.save();
+    if (invertJawapos.checked) ctxFoto.filter = "invert(1)";
+    ctxFoto.drawImage(logoKananAtas, canvasFoto.width - w - margin, margin, w, h);
+    ctxFoto.restore();
   }
 
   // Logo kiri bawah
   if (logoKiriBawah.complete){
-    const w=100,h=logoKiriBawah.height*(100/logoKiriBawah.width);
-    ctxFoto.drawImage(logoKiriBawah,0,canvasFoto.height-h,w,h);
+    const w = Math.round(canvasFoto.width * 0.093);
+    const h = logoKiriBawah.height * (w / logoKiriBawah.width);
+    ctxFoto.drawImage(logoKiriBawah, margin * 0.3, canvasFoto.height - h, w, h);
   }
 
-  // Logo medsos
+  // Logo medsos (lebar maksimal 71% lebar kanvas, dengan jarak bawah relatif)
   if (medsosLogo.complete){
-    const maxW=canvasFoto.width*0.71,sc=maxW/medsosLogo.width;
-    const w=medsosLogo.width*sc,h=medsosLogo.height*sc;
-    ctxFoto.save();if(invertMedsos.checked)ctxFoto.filter="invert(1)";
-    ctxFoto.drawImage(medsosLogo,(canvasFoto.width-w)/2,canvasFoto.height-h-165,w,h);ctxFoto.restore();
+    const maxW = canvasFoto.width * 0.71;
+    const sc = maxW / medsosLogo.width;
+    const w = medsosLogo.width * sc;
+    const h = medsosLogo.height * sc;
+    const bottomGap = rel(0.12); // jarak dari bawah
+    ctxFoto.save();
+    if (invertMedsos.checked) ctxFoto.filter = "invert(1)";
+    ctxFoto.drawImage(medsosLogo, (canvasFoto.width - w)/2, canvasFoto.height - h - bottomGap, w, h);
+    ctxFoto.restore();
   }
 
   // Kredit foto
   if (kreditInput.value){
-    ctxFoto.font = 'bold 17px Metropolis';
-    ctxFoto.fillStyle=kreditColor.value;
-    const tw=ctxFoto.measureText(kreditInput.value).width;
-    ctxFoto.fillText(kreditInput.value,canvasFoto.width-tw-50,canvasFoto.height-50);
+    ctxFoto.font = `${Math.max(14, rel(0.016))}px Metropolis`;
+    ctxFoto.font = 'bold ' + ctxFoto.font;
+    ctxFoto.fillStyle = kreditColor.value;
+    const tw = ctxFoto.measureText(kreditInput.value).width;
+    ctxFoto.fillText(kreditInput.value, canvasFoto.width - tw - margin, canvasFoto.height - margin);
   }
 
   // Award
   const type = awardSelect.value;
   if (type && awardLogos[type] && awardLogos[type].complete){
     const logo = awardLogos[type];
-    const w=120,h=logo.height*(120/logo.width);
+    const w = rel(0.11);
+    const h = logo.height * (w / logo.width);
+    const ax = canvasFoto.width - margin * 2.2;
+    const ay = canvasFoto.height - margin * 3.6;
     ctxFoto.save();
-    ctxFoto.translate(canvasFoto.width-120,canvasFoto.height-240);
+    ctxFoto.translate(ax, ay);
     ctxFoto.rotate(-Math.PI/10);
-    ctxFoto.drawImage(logo,-w/2,-h/2,w,h);
+    ctxFoto.drawImage(logo, -w/2, -h/2, w, h);
     ctxFoto.restore();
   }
 }
@@ -100,16 +135,16 @@ function drawFoto(){
 function drawUI(){
   ctxUI.clearRect(0,0,canvasUI.width,canvasUI.height);
   ctxUI.save();
-  ctxUI.strokeStyle="#000";
-  ctxUI.fillStyle="#000";
-  ctxUI.font="12px Arial";
+  ctxUI.strokeStyle = "#000";
+  ctxUI.fillStyle = "#000";
+  ctxUI.font = Math.max(10, rel(0.012)) + "px Arial";
   for(let i=0;i<=24;i++){
     const y = (canvasUI.height/24)*i;
     ctxUI.beginPath();
     ctxUI.moveTo(0,y);
-    ctxUI.lineTo(15,y);
+    ctxUI.lineTo(rel(0.014),y);
     ctxUI.stroke();
-    ctxUI.fillText(i,20,y+4);
+    ctxUI.fillText(i, rel(0.02), y + rel(0.004));
   }
   ctxUI.restore();
 }
@@ -138,6 +173,11 @@ invertJawapos.addEventListener("change", drawFoto);
 invertMedsos.addEventListener("change", drawFoto);
 awardSelect.addEventListener("change", drawFoto);
 zoomSlider.addEventListener("input", ()=>{ zoomFactor=parseFloat(zoomSlider.value); drawFoto(); });
+
+// Ganti orientasi
+orientationSelect.addEventListener("change", (e)=>{
+  setOrientation(e.target.value);
+});
 
 // Drag
 canvasFoto.addEventListener("mousedown", e=>{
@@ -187,7 +227,7 @@ canvasFoto.addEventListener("touchmove",e=>{
 // Download hanya foto
 downloadBtn.addEventListener("click", ()=>{
   if (!img) return alert("Belum ada gambar.");
-  drawFoto(); // Panggil drawFoto sekali lagi untuk memastikan semua elemen tergambar sebelum download
+  drawFoto(); // pastikan sudah tergambar
   canvasFoto.toBlob(blob=>{
     const url=URL.createObjectURL(blob);
     const a=document.createElement("a");
@@ -211,5 +251,5 @@ Promise.all([
     new Promise(resolve => awardLogos.bronze.onload = resolve)
 ]).then(() => {
     console.log("Semua aset gambar berhasil dimuat.");
-    drawFoto(); // Gambar ulang jika ada gambar utama yang sudah dimuat sebelumnya
+    drawFoto();
 });
