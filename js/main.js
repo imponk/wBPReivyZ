@@ -139,25 +139,24 @@ function drawFoto(){
 
     let awardScale = 1.0;
     let marginBottom = 100;
-
-    if (orientation === "vertical") {
-      marginBottom = 110;
-    } else if (orientation === "square") {
-      marginBottom = 100;
-    } else if (orientation === "horizontal") {
+    if (orientation === "vertical") marginBottom = 110;
+    else if (orientation === "square") marginBottom = 100;
+    else if (orientation === "horizontal") {
       awardScale = 1.6;
       marginBottom = 80;
     }
 
     const w = rel(0.11) * awardScale;
     const h = logo.height * (w / logo.width);
-    const ax = canvasFoto.width - marginRight - w / 2;
-    const ay = canvasFoto.height - marginBottom;
+
+    // Gunakan pojok kanan-bawah sebagai acuan posisi
+    const ax = canvasFoto.width - marginRight - w;
+    const ay = canvasFoto.height - marginBottom - h;
 
     ctxFoto.save();
-    ctxFoto.translate(ax, ay);
-    ctxFoto.rotate(-Math.PI/10);
-    ctxFoto.drawImage(logo, -w/2, -h/2, w, h);
+    ctxFoto.translate(ax + w, ay + h); // rotasi dari pojok kanan bawah
+    ctxFoto.rotate(-Math.PI / 10);
+    ctxFoto.drawImage(logo, -w, -h, w, h);
     ctxFoto.restore();
   }
 }
