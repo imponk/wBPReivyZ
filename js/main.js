@@ -47,33 +47,36 @@ const medsosLogo = new Image();
 medsosLogo.crossOrigin = "anonymous";
 medsosLogo.src = "assets/logo-medsos.svg";
 
-// AWARDS
-const awardLogos = {
-  gold: new Image(),
-  silver: new Image(),
-  bronze: new Image()
-};
-awardLogos.gold.src = "assets/award-gold.png";
-awardLogos.silver.src = "assets/award-silver.png";
-awardLogos.bronze.src = "assets/award-bronze.png";
+  // === AWARD LOGO ===
+  const type = awardSelect.value;
+  if (type && awardLogos[type] && awardLogos[type].complete){
+    const logo = awardLogos[type];
 
-function rel(n){ return Math.round(Math.min(canvasFoto.width, canvasFoto.height) * n); }
+    // Tentukan ukuran berdasarkan orientasi
+    let awardScale = 1.0;
+    if (orientation === "horizontal") awardScale = 0.8;  // hanya 80% untuk horizontal
+    else awardScale = 1.0;  // ukuran normal untuk vertikal dan square
 
-function drawFoto(){
-  if (!img) {
-    ctxFoto.clearRect(0,0,canvasFoto.width,canvasFoto.height);
-    return;
+    // Ukuran dasar dan posisi
+    const w = rel(0.11) * awardScale;
+    const h = logo.height * (w / logo.width);
+    const margin = Math.round(canvasFoto.height * 0.046);
+
+    // Posisi dasar
+    let ax = canvasFoto.width - margin * 2.2;
+    const ay = canvasFoto.height - margin * 3.6;
+
+    // Geser 2px ke kanan khusus vertikal
+    if (orientation === "vertical") {
+      ax += 2;
+    }
+
+    ctxFoto.save();
+    ctxFoto.translate(ax, ay);
+    ctxFoto.rotate(-Math.PI/10);
+    ctxFoto.drawImage(logo, -w/2, -h/2, w, h);
+    ctxFoto.restore();
   }
-  ctxFoto.fillStyle = "#fafafa";
-  ctxFoto.fillRect(0,0,canvasFoto.width,canvasFoto.height);
-
-  const baseScale = Math.max(canvasFoto.width / img.width, canvasFoto.height / img.height);
-  const scale = baseScale * zoomFactor;
-  const drawW = img.width * scale;
-  const drawH = img.height * scale;
-  const posX = (canvasFoto.width - drawW) / 2 + offsetX;
-  const posY = (canvasFoto.height - drawH) / 2 + offsetY;
-  ctxFoto.drawImage(img, posX, posY, drawW, drawH);
 
   // Tentukan orientasi & skala logo
   const orientation = orientationSelect.value;
@@ -117,11 +120,19 @@ function drawFoto(){
 
   // === KREDIT FOTO ===
   if (kreditInput.value){
-    const margin = Math.round(canvasFoto.height * 0.046);
+    let marginRight, marginBottom;
+    if (orientation === "horizontal") {
+      marginRight = 50; // jarak fix untuk horizontal
+      marginBottom = 45;
+    } else {
+      marginRight = Math.round(canvasFoto.height * 0.046);
+      marginBottom = marginRight;
+    }
+
     ctxFoto.font = `bold ${Math.max(14, Math.round(canvasFoto.height * 0.016))}px Metropolis`;
     ctxFoto.fillStyle = kreditColor.value;
     const tw = ctxFoto.measureText(kreditInput.value).width;
-    ctxFoto.fillText(kreditInput.value, canvasFoto.width - tw - margin, canvasFoto.height - margin);
+    ctxFoto.fillText(kreditInput.value, canvasFoto.width - tw - marginRight, canvasFoto.height - marginBottom);
   }
 
   // === AWARD LOGO ===
