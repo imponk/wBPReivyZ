@@ -16,10 +16,12 @@ const orientationSelect = document.getElementById("orientation");
 let img = null, zoomFactor = 1, offsetX = 0, offsetY = 0;
 let isDragging = false, dragStartX = 0, dragStartY = 0, dragOffsetX = 0, dragOffsetY = 0;
 
+// --- ORIENTASI TAMBAHAN ---
 const ORIENTATIONS = {
   vertical:  { width: 1080, height: 1350 },
   horizontal:{ width: 1080, height: 608 },
-  square:    { width: 1080, height: 1080 }
+  square:    { width: 1080, height: 1080 },
+  three_two: { width: 1080, height: 720 } // ✅ Tambahan 3:2
 };
 
 function setOrientation(mode){
@@ -34,7 +36,7 @@ function setOrientation(mode){
 }
 setOrientation(orientationSelect?.value || "vertical");
 
-// LOGO assets
+// --- LOGO assets ---
 const logoKiriBawah = new Image();
 logoKiriBawah.crossOrigin = "anonymous";
 logoKiriBawah.src = "assets/logo-jawapos-kotak.svg";
@@ -47,7 +49,7 @@ const medsosLogo = new Image();
 medsosLogo.crossOrigin = "anonymous";
 medsosLogo.src = "assets/logo-medsos.svg";
 
-// AWARDS
+// --- AWARDS ---
 const awardLogos = {
   gold: new Image(),
   silver: new Image(),
@@ -78,9 +80,9 @@ function drawFoto(){
   const orientation = orientationSelect.value;
   let scaleFactor = 1.0;
   if (orientation === "vertical" || orientation === "square") scaleFactor = 0.9;
-  else if (orientation === "horizontal") scaleFactor = 0.8;
+  else if (orientation === "horizontal" || orientation === "three_two") scaleFactor = 0.8;
 
-  // === LOGO TEKS (pojok kanan atas, jarak 50 kanan, 45 atas) ===
+  // === LOGO TEKS ===
   if (logoKananAtas.complete){
     const w = Math.round(canvasFoto.width * 0.185 * scaleFactor);
     const h = logoKananAtas.height * (w / logoKananAtas.width);
@@ -96,9 +98,7 @@ function drawFoto(){
   if (logoKiriBawah.complete){
     const w = Math.round(canvasFoto.width * 0.093 * scaleFactor);
     const h = logoKiriBawah.height * (w / logoKiriBawah.width);
-    const x = 0;
-    const y = canvasFoto.height - h;
-    ctxFoto.drawImage(logoKiriBawah, x, y, w, h);
+    ctxFoto.drawImage(logoKiriBawah, 0, canvasFoto.height - h, w, h);
   }
 
   // === LOGO MEDSOS ===
@@ -117,7 +117,7 @@ function drawFoto(){
   // === KREDIT FOTO ===
   if (kreditInput.value){
     let marginRight, marginBottom;
-    if (orientation === "horizontal") {
+    if (orientation === "horizontal" || orientation === "three_two") {
       marginRight = 50;
       marginBottom = 45;
     } else {
@@ -136,19 +136,18 @@ function drawFoto(){
   if (type && awardLogos[type] && awardLogos[type].complete){
     const logo = awardLogos[type];
     const marginRight = 46;
-
     let awardScale = 1.0;
     let marginBottom = 150;
+
     if (orientation === "vertical") marginBottom = 170;
     else if (orientation === "square") marginBottom = 150;
-    else if (orientation === "horizontal") {
+    else if (orientation === "horizontal" || orientation === "three_two") {
       awardScale = 1.6;
       marginBottom = 90;
     }
 
     const w = rel(0.11) * awardScale;
     const h = logo.height * (w / logo.width);
-
     const theta = Math.PI / 10;
     const drop = w * Math.sin(theta);
 
@@ -163,6 +162,7 @@ function drawFoto(){
   }
 }
 
+// === UI GARIS PENGUKUR ===
 function drawUI(){
   ctxUI.clearRect(0,0,canvasUI.width,canvasUI.height);
   ctxUI.save();
@@ -206,7 +206,7 @@ awardSelect.addEventListener("change", drawFoto);
 zoomSlider.addEventListener("input", ()=>{ zoomFactor=parseFloat(zoomSlider.value); drawFoto(); });
 orientationSelect.addEventListener("change", (e)=>{ setOrientation(e.target.value); });
 
-// Drag & zoom gesture
+// --- Drag/Zoom mouse & touch ---
 canvasFoto.addEventListener("mousedown", e=>{
   isDragging=true;dragStartX=e.clientX;dragStartY=e.clientY;
   dragOffsetX=offsetX;dragOffsetY=offsetY;
@@ -226,7 +226,6 @@ window.addEventListener("mouseup", ()=>{
   isDragging=false;canvasFoto.classList.remove("grabbing");
 });
 
-// Pinch zoom (mobile)
 let lastDist=0;
 canvasFoto.addEventListener("touchstart",e=>{
   if(e.touches.length===2){
@@ -251,7 +250,7 @@ canvasFoto.addEventListener("touchmove",e=>{
   }
 });
 
-// Download hasil
+// === DOWNLOAD ===
 downloadBtn.addEventListener("click", ()=>{
   if (!img) return alert("Belum ada gambar.");
   drawFoto();
