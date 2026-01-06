@@ -141,7 +141,7 @@ if (kreditInput.value){
 
   // 🔽 kecilkan 3 poin khusus 16:9
   if (orientation === "horizontal") {
-    fontSize = fontSize - 3;
+    fontSize = fontSize - 5;
   }
 
 ctxFoto.font = `bold ${Math.max(14, Math.round(canvasFoto.height * 0.016))}px Metropolis`;
