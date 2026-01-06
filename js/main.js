@@ -134,7 +134,7 @@ function drawFoto(){
   if (kreditInput.value){
     let marginRight, marginBottom;
 
-    // margin tetap mengikuti versi asli
+    // margin mengikuti versi asli
     if (orientation === "horizontal" || orientation === "three_two") {
       marginRight = 50;
       marginBottom = 45;
@@ -143,13 +143,18 @@ function drawFoto(){
       marginBottom = marginRight;
     }
 
-    // ✅ Samakan ukuran font kredit untuk 16:9 dan 9:16 dengan versi 4:5 (vertical)
+    // ✅ Aturan font kredit:
+    // - vertical_9_16: samakan dengan 4:5 (vertical)
+    // - horizontal 16:9: samakan dengan square
     let baseHeightForFont = canvasFoto.height;
-    if (orientation === "horizontal" || orientation === "vertical_9_16") {
+    if (orientation === "vertical_9_16") {
       baseHeightForFont = ORIENTATIONS.vertical.height; // 1350
+    } else if (orientation === "horizontal") {
+      baseHeightForFont = ORIENTATIONS.square.height;   // 1080
     }
 
     const fontSize = Math.max(14, Math.round(baseHeightForFont * 0.016));
+
     ctxFoto.font = `bold ${fontSize}px Metropolis`;
     ctxFoto.fillStyle = kreditColor.value;
 
@@ -236,7 +241,7 @@ invertMedsos.addEventListener("change", drawFoto);
 awardSelect.addEventListener("change", drawFoto);
 zoomSlider.addEventListener("input", ()=>{ zoomFactor = parseFloat(zoomSlider.value); drawFoto(); });
 
-// pastikan change menangkap "3:2" maupun "three_two"
+// change orientation
 orientationSelect.addEventListener("change", (e)=>{ setOrientation(normalizeMode(e.target.value)); });
 
 // Drag & zoom (mouse)
