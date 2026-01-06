@@ -144,7 +144,7 @@ if (kreditInput.value){
     fontSize = fontSize - 3;
   }
 
-  ctxFoto.font = `bold ${fontSize}px Metropolis`;
+ctxFoto.font = `bold ${Math.max(14, Math.round(canvasFoto.height * 0.016))}px Metropolis`;
   ctxFoto.fillStyle = kreditColor.value;
   const tw = ctxFoto.measureText(kreditInput.value).width;
   ctxFoto.fillText(
