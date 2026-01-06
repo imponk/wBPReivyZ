@@ -19,8 +19,8 @@ let isDragging = false, dragStartX = 0, dragStartY = 0, dragOffsetX = 0, dragOff
 // Rasio kanvas
 const ORIENTATIONS = {
   vertical:       { width: 1080, height: 1350 }, // 4:5
-  vertical_9_16:  { width: 1080, height: 1920 }, // ✅ 9:16 (Reels/Shorts)
-  horizontal:     { width: 1080, height: 608  }, // 16:9 approx (1080x607.5 dibulatkan 608)
+  vertical_9_16:  { width: 1080, height: 1920 }, // 9:16
+  horizontal:     { width: 1080, height: 608  }, // 16:9
   square:         { width: 1080, height: 1080 }, // 1:1
   three_two:      { width: 1080, height: 720  }, // 3:2
 };
