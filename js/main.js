@@ -29,11 +29,13 @@ const ORIENTATIONS = {
 function normalizeMode(mode) {
   if (!mode) return "vertical";
   const m = String(mode).toLowerCase().trim();
+
   if (m === "3:2" || m === "three_two" || m === "three-two") return "three_two";
   if (m === "16:9" || m === "widescreen") return "horizontal";
   if (m === "1:1" || m === "square") return "square";
   if (m === "9:16" || m === "vertical_9_16" || m === "vertical-9-16" || m === "reels" || m === "shorts") return "vertical_9_16";
   if (m === "4:5" || m === "vertical" || m === "portrait") return "vertical";
+
   // fallback ke vertical bila tidak dikenal
   return ORIENTATIONS[m] ? m : "vertical";
 }
@@ -41,12 +43,15 @@ function normalizeMode(mode) {
 function setOrientation(mode){
   const key = normalizeMode(mode);
   const o = ORIENTATIONS[key];
+
   canvasFoto.width = o.width;
   canvasFoto.height = o.height;
   canvasUI.width = o.width;
   canvasUI.height = o.height;
+
   offsetX = 0;
   offsetY = 0;
+
   drawFoto();
   drawUI();
 }
@@ -88,6 +93,7 @@ function drawFoto(){
   ctxFoto.drawImage(img, posX, posY, drawW, drawH);
 
   const orientation = normalizeMode(orientationSelect?.value);
+
   let scaleFactor = 1.0;
   if (orientation === "vertical" || orientation === "square" || orientation === "vertical_9_16") scaleFactor = 0.9;
   else if (orientation === "horizontal" || orientation === "three_two") scaleFactor = 0.8;
@@ -127,6 +133,8 @@ function drawFoto(){
   // === KREDIT FOTO
   if (kreditInput.value){
     let marginRight, marginBottom;
+
+    // margin tetap mengikuti versi asli
     if (orientation === "horizontal" || orientation === "three_two") {
       marginRight = 50;
       marginBottom = 45;
@@ -135,9 +143,9 @@ function drawFoto(){
       marginBottom = marginRight;
     }
 
-    // ✅ Samakan ukuran font kredit 16:9 dengan versi 4:5 (vertical)
+    // ✅ Samakan ukuran font kredit untuk 16:9 dan 9:16 dengan versi 4:5 (vertical)
     let baseHeightForFont = canvasFoto.height;
-    if (orientation === "horizontal") {
+    if (orientation === "horizontal" || orientation === "vertical_9_16") {
       baseHeightForFont = ORIENTATIONS.vertical.height; // 1350
     }
 
@@ -146,7 +154,11 @@ function drawFoto(){
     ctxFoto.fillStyle = kreditColor.value;
 
     const tw = ctxFoto.measureText(kreditInput.value).width;
-    ctxFoto.fillText(kreditInput.value, canvasFoto.width - tw - marginRight, canvasFoto.height - marginBottom);
+    ctxFoto.fillText(
+      kreditInput.value,
+      canvasFoto.width - tw - marginRight,
+      canvasFoto.height - marginBottom
+    );
   }
 
   // === AWARD LOGO
@@ -158,9 +170,9 @@ function drawFoto(){
     let awardScale = 1.0;
     let marginBottom = 150; // square default (lihat tabel terbaru: vertical 170, square 150, horizontal/3:2 90)
 
-    if (orientation === "vertical")      marginBottom = 170;
+    if (orientation === "vertical") marginBottom = 170;
     else if (orientation === "vertical_9_16") marginBottom = 170; // samakan dengan vertical
-    else if (orientation === "square")   marginBottom = 150;
+    else if (orientation === "square") marginBottom = 150;
     else if (orientation === "horizontal" || orientation === "three_two") {
       marginBottom = 90;
       awardScale = 1.6;
