@@ -18,10 +18,11 @@ let isDragging = false, dragStartX = 0, dragStartY = 0, dragOffsetX = 0, dragOff
 
 // Rasio kanvas
 const ORIENTATIONS = {
-  vertical:   { width: 1080, height: 1350 }, // 4:5
-  horizontal: { width: 1080, height: 608  }, // 16:9 approx (1080x607.5 dibulatkan 608)
-  square:     { width: 1080, height: 1080 }, // 1:1
-  three_two:  { width: 1080, height: 720  }, // 3:2
+  vertical:       { width: 1080, height: 1350 }, // 4:5
+  vertical_9_16:  { width: 1080, height: 1920 }, // ✅ 9:16 (Reels/Shorts)
+  horizontal:     { width: 1080, height: 608  }, // 16:9 approx (1080x607.5 dibulatkan 608)
+  square:         { width: 1080, height: 1080 }, // 1:1
+  three_two:      { width: 1080, height: 720  }, // 3:2
 };
 
 // Normalisasi nilai dari <select>
@@ -31,6 +32,7 @@ function normalizeMode(mode) {
   if (m === "3:2" || m === "three_two" || m === "three-two") return "three_two";
   if (m === "16:9" || m === "widescreen") return "horizontal";
   if (m === "1:1" || m === "square") return "square";
+  if (m === "9:16" || m === "vertical_9_16" || m === "vertical-9-16" || m === "reels" || m === "shorts") return "vertical_9_16";
   if (m === "4:5" || m === "vertical" || m === "portrait") return "vertical";
   // fallback ke vertical bila tidak dikenal
   return ORIENTATIONS[m] ? m : "vertical";
@@ -89,6 +91,7 @@ function drawFoto(){
   let scaleFactor = 1.0;
   if (orientation === "vertical" || orientation === "square") scaleFactor = 0.9;
   else if (orientation === "horizontal" || orientation === "three_two") scaleFactor = 0.8;
+  else if (orientation === "vertical_9_16") scaleFactor = 0.9; // ✅ selaras dengan vertical/square
 
   // === LOGO TEKS (kanan atas: 50 dari kanan, 45 dari atas)
   if (logoKananAtas.complete){
@@ -153,6 +156,7 @@ function drawFoto(){
       marginBottom = 90;
       awardScale = 1.6;
     }
+    else if (orientation === "vertical_9_16") marginBottom = 170; // ✅ samakan dengan vertical
 
     const w = rel(0.11) * awardScale;
     const h = logo.height * (w / logo.width);
