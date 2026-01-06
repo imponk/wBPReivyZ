@@ -125,21 +125,34 @@ function drawFoto(){
     ctxFoto.restore();
   }
 
-  // === KREDIT FOTO
-  if (kreditInput.value){
-    let marginRight, marginBottom;
-    if (orientation === "horizontal" || orientation === "three_two") {
-      marginRight = 50;
-      marginBottom = 45;
-    } else {
-      marginRight = Math.round(canvasFoto.height * 0.046);
-      marginBottom = marginRight;
-    }
-    ctxFoto.font = `bold ${Math.max(14, Math.round(canvasFoto.height * 0.016))}px Metropolis`;
-    ctxFoto.fillStyle = kreditColor.value;
-    const tw = ctxFoto.measureText(kreditInput.value).width;
-    ctxFoto.fillText(kreditInput.value, canvasFoto.width - tw - marginRight, canvasFoto.height - marginBottom);
+// === KREDIT FOTO
+if (kreditInput.value){
+  let marginRight, marginBottom;
+  if (orientation === "horizontal" || orientation === "three_two") {
+    marginRight = 50;
+    marginBottom = 45;
+  } else {
+    marginRight = Math.round(canvasFoto.height * 0.046);
+    marginBottom = marginRight;
   }
+
+  // ukuran font dasar
+  let fontSize = Math.max(14, Math.round(canvasFoto.height * 0.016));
+
+  // 🔽 kecilkan 3 poin khusus 16:9
+  if (orientation === "horizontal") {
+    fontSize = fontSize - 3;
+  }
+
+  ctxFoto.font = `bold ${fontSize}px Metropolis`;
+  ctxFoto.fillStyle = kreditColor.value;
+  const tw = ctxFoto.measureText(kreditInput.value).width;
+  ctxFoto.fillText(
+    kreditInput.value,
+    canvasFoto.width - tw - marginRight,
+    canvasFoto.height - marginBottom
+  );
+}
 
   // === AWARD LOGO
   const type = awardSelect.value;
