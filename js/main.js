@@ -18,11 +18,11 @@ let isDragging = false, dragStartX = 0, dragStartY = 0, dragOffsetX = 0, dragOff
 
 // Rasio kanvas
 const ORIENTATIONS = {
-  vertical:       { width: 1080, height: 1350 }, // 4:5
-  vertical_9_16:  { width: 1080, height: 1920 }, // 9:16
-  horizontal:     { width: 1080, height: 608  }, // 16:9
-  square:         { width: 1080, height: 1080 }, // 1:1
-  three_two:      { width: 1080, height: 720  }, // 3:2
+  vertical:      { width: 1080, height: 1350 }, // 4:5
+  vertical_9_16: { width: 1080, height: 1920 }, // ✅ 9:16 (Reels/Shorts)
+  horizontal:    { width: 1080, height: 608  }, // 16:9 approx (1080x607.5 dibulatkan 608)
+  square:        { width: 1080, height: 1080 }, // 1:1
+  three_two:     { width: 1080, height: 720  }, // 3:2
 };
 
 // Normalisasi nilai dari <select>
@@ -47,7 +47,7 @@ function setOrientation(mode){
   canvasUI.height = o.height;
   offsetX = 0;
   offsetY = 0;
-  drawFoto(); 
+  drawFoto();
   drawUI();
 }
 
@@ -89,9 +89,8 @@ function drawFoto(){
 
   const orientation = normalizeMode(orientationSelect?.value);
   let scaleFactor = 1.0;
-  if (orientation === "vertical" || orientation === "square") scaleFactor = 0.9;
+  if (orientation === "vertical" || orientation === "square" || orientation === "vertical_9_16") scaleFactor = 0.9;
   else if (orientation === "horizontal" || orientation === "three_two") scaleFactor = 0.8;
-  else if (orientation === "vertical_9_16") scaleFactor = 0.9; // ✅ selaras dengan vertical/square
 
   // === LOGO TEKS (kanan atas: 50 dari kanan, 45 dari atas)
   if (logoKananAtas.complete){
@@ -125,34 +124,30 @@ function drawFoto(){
     ctxFoto.restore();
   }
 
-// === KREDIT FOTO
-if (kreditInput.value){
-  let marginRight, marginBottom;
-  if (orientation === "horizontal" || orientation === "three_two") {
-    marginRight = 50;
-    marginBottom = 45;
-  } else {
-    marginRight = Math.round(canvasFoto.height * 0.046);
-    marginBottom = marginRight;
+  // === KREDIT FOTO
+  if (kreditInput.value){
+    let marginRight, marginBottom;
+    if (orientation === "horizontal" || orientation === "three_two") {
+      marginRight = 50;
+      marginBottom = 45;
+    } else {
+      marginRight = Math.round(canvasFoto.height * 0.046);
+      marginBottom = marginRight;
+    }
+
+    // ✅ Samakan ukuran font kredit 16:9 dengan versi 4:5 (vertical)
+    let baseHeightForFont = canvasFoto.height;
+    if (orientation === "horizontal") {
+      baseHeightForFont = ORIENTATIONS.vertical.height; // 1350
+    }
+
+    const fontSize = Math.max(14, Math.round(baseHeightForFont * 0.016));
+    ctxFoto.font = `bold ${fontSize}px Metropolis`;
+    ctxFoto.fillStyle = kreditColor.value;
+
+    const tw = ctxFoto.measureText(kreditInput.value).width;
+    ctxFoto.fillText(kreditInput.value, canvasFoto.width - tw - marginRight, canvasFoto.height - marginBottom);
   }
-
-  // ukuran font dasar
-  let fontSize = Math.max(14, Math.round(canvasFoto.height * 0.016));
-
-  // 🔽 kecilkan 3 poin khusus 16:9
-  if (orientation === "horizontal") {
-    fontSize = fontSize - 5;
-  }
-
-ctxFoto.font = `bold ${Math.max(14, Math.round(canvasFoto.height * 0.016))}px Metropolis`;
-  ctxFoto.fillStyle = kreditColor.value;
-  const tw = ctxFoto.measureText(kreditInput.value).width;
-  ctxFoto.fillText(
-    kreditInput.value,
-    canvasFoto.width - tw - marginRight,
-    canvasFoto.height - marginBottom
-  );
-}
 
   // === AWARD LOGO
   const type = awardSelect.value;
@@ -164,12 +159,12 @@ ctxFoto.font = `bold ${Math.max(14, Math.round(canvasFoto.height * 0.016))}px Me
     let marginBottom = 150; // square default (lihat tabel terbaru: vertical 170, square 150, horizontal/3:2 90)
 
     if (orientation === "vertical")      marginBottom = 170;
+    else if (orientation === "vertical_9_16") marginBottom = 170; // samakan dengan vertical
     else if (orientation === "square")   marginBottom = 150;
     else if (orientation === "horizontal" || orientation === "three_two") {
       marginBottom = 90;
       awardScale = 1.6;
     }
-    else if (orientation === "vertical_9_16") marginBottom = 170; // ✅ samakan dengan vertical
 
     const w = rel(0.11) * awardScale;
     const h = logo.height * (w / logo.width);
